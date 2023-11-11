@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Horization.Commons.Collection", "src\Horization.Commons.Collection\Horization.Commons.Collection.csproj", "{DD863355-DD9A-408E-AD8B-0C04B78449B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Horization.Commons.Collection.Reactive", "src\Horization.Commons.Collection.Reactive\Horization.Commons.Collection.Reactive.csproj", "{D31F6059-C3EA-4A67-BC52-9343C7B1362C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DD863355-DD9A-408E-AD8B-0C04B78449B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD863355-DD9A-408E-AD8B-0C04B78449B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD863355-DD9A-408E-AD8B-0C04B78449B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD863355-DD9A-408E-AD8B-0C04B78449B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D31F6059-C3EA-4A67-BC52-9343C7B1362C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D31F6059-C3EA-4A67-BC52-9343C7B1362C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D31F6059-C3EA-4A67-BC52-9343C7B1362C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D31F6059-C3EA-4A67-BC52-9343C7B1362C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

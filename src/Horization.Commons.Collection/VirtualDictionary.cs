@@ -44,7 +44,8 @@ public class VirtualDictionary<TKey, TValue> : IDictionary<TKey, TValue> where T
 
 	/// <inheritdoc />
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public virtual void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) => DictionaryImpl.CopyTo(array, arrayIndex);
+	public virtual void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) =>
+		DictionaryImpl.CopyTo(array, arrayIndex);
 
 	/// <inheritdoc />
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -70,7 +71,8 @@ public class VirtualDictionary<TKey, TValue> : IDictionary<TKey, TValue> where T
 
 	/// <inheritdoc />
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public virtual bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value) => DictionaryImpl.TryGetValue(key, out value);
+	public virtual bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value) =>
+		DictionaryImpl.TryGetValue(key, out value);
 
 	/// <inheritdoc />
 	public virtual TValue this[TKey key]

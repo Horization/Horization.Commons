@@ -6,26 +6,40 @@ namespace Horization.Commons.Collection;
 /// <summary>
 /// Represents a dictionary with operation restriction
 /// </summary>
+/// <typeparam name="TWrapped">The type of the wrapped content</typeparam>
 /// <typeparam name="TKey">The type of keys in the dictionary</typeparam>
 /// <typeparam name="TValue">The type of values in the dictionary</typeparam>
 /// <remarks>
 /// Just a wrapper for VirtualDictionary with a restriction policy, it may be SLOW
 /// </remarks>
-public class RestrictedDictionary<TKey, TValue> : VirtualDictionary<TKey, TValue> where TKey : notnull
+public class RestrictedDictionary<TWrapped, TKey, TValue>
+	: VirtualDictionary<TKey, TValue>,
+		IWrapper<RestrictedDictionary<TWrapped, TKey, TValue>, TWrapped>
+	where TKey : notnull
 {
 	/// <summary>
 	/// The restriction policy
 	/// </summary>
 	public readonly OperationRestriction Restriction;
 
+	/// <inheritdoc />
+	TWrapped IWrapper<RestrictedDictionary<TWrapped, TKey, TValue>, TWrapped>.Wrapped => (TWrapped)DictionaryImpl;
+
+
+	/// <inheritdoc />
+	public bool PublicWrapped { get; }
+
 	/// <summary>
 	/// Construct a new instance
 	/// </summary>
-	/// <param name="dictionaryImpl">The actual implementation which would be used</param>
-	/// <param name="restriction">The restriction policy</param>
-	public RestrictedDictionary(IDictionary<TKey, TValue> dictionaryImpl, OperationRestriction restriction) : base(dictionaryImpl)
+	/// <param name="dictionaryImpl">The <see cref="VirtualDictionary{TKey,TValue}.DictionaryImpl"/></param>
+	/// <param name="restriction">The <see cref="Restriction"/></param>
+	/// <param name="publicWrapped">The <see cref="PublicWrapped"/></param>
+	public RestrictedDictionary(IDictionary<TKey, TValue> dictionaryImpl, OperationRestriction restriction,
+		bool publicWrapped = false) : base(dictionaryImpl)
 	{
 		Restriction = restriction;
+		PublicWrapped = publicWrapped;
 	}
 
 	/// <inheritdoc />
@@ -52,7 +66,8 @@ public class RestrictedDictionary<TKey, TValue> : VirtualDictionary<TKey, TValue
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		get => (Restriction & OperationRestriction.GetItem) != 0 ? throw new InvalidOperationException() : base[key];
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		set {
+		set
+		{
 			if ((Restriction & OperationRestriction.SetItem) != 0) throw new InvalidOperationException();
 			base[key] = value;
 		}
@@ -98,6 +113,10 @@ public class RestrictedDictionary<TKey, TValue> : VirtualDictionary<TKey, TValue
 		return base.TryGetValue(key, out value);
 	}
 
+	/// <inheritdoc />
+	public static implicit operator TWrapped(RestrictedDictionary<TWrapped, TKey, TValue> @this)
+		=> ((IWrapper<RestrictedDictionary<TWrapped, TKey, TWrapped>, TWrapped>)@this).Unwrap();
+
 	/// <summary>
 	/// Represents a set of operations which would be restricted
 	/// </summary>
@@ -108,38 +127,47 @@ public class RestrictedDictionary<TKey, TValue> : VirtualDictionary<TKey, TValue
 		/// Represents <see cref="IDictionary{TKey,TValue}.get_Item"/>
 		/// </summary>
 		GetItem = 1 << 0,
+
 		/// <summary>
 		/// Represents <see cref="IDictionary{TKey,TValue}.set_Item"/>
 		/// </summary>
 		SetItem = 1 << 1,
+
 		/// <summary>
 		/// Represents <see cref="IDictionary{TKey,TValue}.Add(TKey, TValue)"/>
 		/// </summary>
 		AddItem = 1 << 2,
+
 		/// <summary>
 		/// Represents <see cref="IDictionary{TKey,TValue}.Clear"/>
 		/// </summary>
 		Clear = 1 << 3,
+
 		/// <summary>
 		/// Represents <see cref="IDictionary{TKey,TValue}.Count"/>
 		/// </summary>
 		CountItems = 1 << 4,
+
 		/// <summary>
 		/// Represents <see cref="IDictionary{TKey,TValue}.Keys"/>
 		/// </summary>
 		EnumerateKeys = 1 << 5,
+
 		/// <summary>
 		/// Represents <see cref="IDictionary{TKey,TValue}.Values"/>
 		/// </summary>
 		EnumerateValues = 1 << 6,
+
 		/// <summary>
 		/// Represents <see cref="IDictionary{TKey,TValue}.Remove(TKey)"/>
 		/// </summary>
 		RemoveItem = 1 << 7,
+
 		/// <summary>
 		/// Represents <see cref="IDictionary{TKey,TValue}.TryGetValue"/>
 		/// </summary>
 		AttemptGettingValue = 1 << 8,
+
 		/// <summary>
 		/// Represents <see cref="IDictionary{TKey,TValue}.GetEnumerator"/>
 		/// </summary>

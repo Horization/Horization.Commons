@@ -4,19 +4,32 @@ using System.Runtime.CompilerServices;
 namespace Horization.Commons.Collection.Reactive;
 
 /// <summary>
-/// Represents a list which implements <see cref="IObservable{T}"/>
+/// Represents a wrapper of list which implements <see cref="IObservable{T}"/>
 /// </summary>
+/// <typeparam name="TWrapped">The type of the wrapped list</typeparam>
 /// <typeparam name="T">The type of elements in the list</typeparam>
-public class ObservableList<T> : VirtualList<T>, IObservable<ObservableList<T>.Notification>
+public class ObservableListWrapper<TWrapped, T>
+	: VirtualList<T>,
+		IObservable<ObservableListWrapper<TWrapped, T>.Notification>,
+		IWrapper<ObservableListWrapper<TWrapped, T>, TWrapped>
+	where TWrapped : IList<T>
 {
 	private readonly SubjectBase<Notification> _subject = new Subject<Notification>();
+
+	/// <inheritdoc/>
+	public bool PublicWrapped { get; }
+
+	/// <inheritdoc />
+	TWrapped IWrapper<ObservableListWrapper<TWrapped, T>, TWrapped>.Wrapped => (TWrapped)ListImpl;
 
 	/// <summary>
 	/// Construct a new instance
 	/// </summary>
 	/// <param name="listImpl">The actual implementation which would be used</param>
-	public ObservableList(IList<T> listImpl) : base(listImpl)
+	/// <param name="publicWrapped">The <see cref="PublicWrapped"/></param>
+	public ObservableListWrapper(TWrapped listImpl, bool publicWrapped = false) : base(listImpl)
 	{
+		PublicWrapped = publicWrapped;
 	}
 
 	/// <inheritdoc />
@@ -29,15 +42,19 @@ public class ObservableList<T> : VirtualList<T>, IObservable<ObservableList<T>.N
 	public override void Add(T item)
 	{
 		base.Add(item);
-		_subject.OnNextIfHavingObservers(new Notification(ObservableList.Event.OnUpdated | ObservableList.Event.OnAdded, this, Count - 1, item, default));
+		_subject.OnNextIfHavingObservers(new Notification(
+			ObservableListWrapper.Event.OnUpdated | ObservableListWrapper.Event.OnAdded,
+			this, Count - 1, item, default));
 	}
-	
+
 	/// <inheritdoc />
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	public override void Clear()
 	{
 		base.Clear();
-		_subject.OnNextIfHavingObservers(new Notification(ObservableList.Event.OnUpdated | ObservableList.Event.OnCleared, this, null, default, default));
+		_subject.OnNextIfHavingObservers(new Notification(
+			ObservableListWrapper.Event.OnUpdated | ObservableListWrapper.Event.OnCleared,
+			this, null, default, default));
 	}
 
 	/// <inheritdoc />
@@ -46,16 +63,20 @@ public class ObservableList<T> : VirtualList<T>, IObservable<ObservableList<T>.N
 	{
 		var removed = base.Remove(item);
 		if (removed)
-			_subject.OnNextIfHavingObservers(new Notification(ObservableList.Event.OnUpdated | ObservableList.Event.OnRemoved, this, null, item, default));
+			_subject.OnNextIfHavingObservers(new Notification(
+				ObservableListWrapper.Event.OnUpdated | ObservableListWrapper.Event.OnRemoved,
+				this, null, item, default));
 		return removed;
 	}
-	
+
 	/// <inheritdoc />
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	public override void Insert(int index, T item)
 	{
 		base.Insert(index, item);
-		_subject.OnNextIfHavingObservers(new Notification(ObservableList.Event.OnUpdated | ObservableList.Event.OnInserted, this, index, item, default));
+		_subject.OnNextIfHavingObservers(new Notification(
+			ObservableListWrapper.Event.OnUpdated | ObservableListWrapper.Event.OnInserted,
+			this, index, item, default));
 	}
 
 	/// <inheritdoc />
@@ -64,7 +85,9 @@ public class ObservableList<T> : VirtualList<T>, IObservable<ObservableList<T>.N
 	{
 		var item = _subject.HasObservers ? this[index] : default;
 		base.RemoveAt(index);
-		_subject.OnNextIfHavingObservers(new Notification(ObservableList.Event.OnUpdated | ObservableList.Event.OnRemoved, this, index, item, default));
+		_subject.OnNextIfHavingObservers(new Notification(
+			ObservableListWrapper.Event.OnUpdated | ObservableListWrapper.Event.OnRemoved,
+			this, index, item, default));
 	}
 
 	/// <inheritdoc />
@@ -75,9 +98,15 @@ public class ObservableList<T> : VirtualList<T>, IObservable<ObservableList<T>.N
 		{
 			var old = _subject.HasObservers ? this[index] : default;
 			base[index] = value;
-			_subject.OnNext(new Notification(ObservableList.Event.OnUpdated | ObservableList.Event.OnSet, this, index, value, old));
+			_subject.OnNext(new Notification(ObservableListWrapper.Event.OnUpdated | ObservableListWrapper.Event.OnSet, this,
+				index, value,
+				old));
 		}
 	}
+
+	/// <inheritdoc/>
+	public static implicit operator TWrapped(ObservableListWrapper<TWrapped, T> @this)
+		=> ((IWrapper<ObservableListWrapper<TWrapped, T>, TWrapped>)@this).Unwrap();
 
 	/// <summary>
 	/// Used to carry details
@@ -87,11 +116,17 @@ public class ObservableList<T> : VirtualList<T>, IObservable<ObservableList<T>.N
 	/// <param name="Idx">The index which the operated item is</param>
 	/// <param name="Item">The item which has been operated</param>
 	/// <param name="OldItem">The old item which has been operated and replaced in set-indexer</param>
-	public readonly record struct Notification(ObservableList.Event Event, ObservableList<T> This, int? Idx, T? Item, T? OldItem);
+	public readonly record struct Notification(
+		ObservableListWrapper.Event Event,
+		ObservableListWrapper<TWrapped, T> This,
+		int? Idx,
+		T? Item,
+		T? OldItem
+	);
 }
 
 #pragma warning disable CS1591
-public static class ObservableList
+public static class ObservableListWrapper
 #pragma warning restore CS1591
 {
 	/// <summary>
@@ -104,22 +139,27 @@ public static class ObservableList
 		/// When the list has been updated
 		/// </summary>
 		OnUpdated = 1 << 0,
+
 		/// <summary>
 		/// When the list has been updated by <see cref="IList{T}.set_Item"/>
 		/// </summary>
 		OnSet = 1 << 1,
+
 		/// <summary>
 		/// When the list has been updated by <see cref="IList{T}.Add"/>
 		/// </summary>
 		OnAdded = 1 << 2,
+
 		/// <summary>
 		/// When the list has been updated by <see cref="IList{T}.Remove"/>
 		/// </summary>
 		OnRemoved = 1 << 3,
+
 		/// <summary>
 		/// When the list has been updated by <see cref="IList{T}.Clear"/>
 		/// </summary>
 		OnCleared = 1 << 4,
+
 		/// <summary>
 		/// When the list has been updated by <see cref="IList{T}.Insert"/>
 		/// </summary>

@@ -12,18 +12,18 @@ namespace Horization.Commons.Collection;
 /// <remarks>
 /// Just a wrapper for VirtualDictionary with a restriction policy, it may be SLOW
 /// </remarks>
-public class RestrictedDictionary<TWrapped, TKey, TValue>
+public class RestrictedDictionaryWrapper<TWrapped, TKey, TValue>
 	: VirtualDictionary<TKey, TValue>,
-		IWrapper<RestrictedDictionary<TWrapped, TKey, TValue>, TWrapped>
+		IWrapper<RestrictedDictionaryWrapper<TWrapped, TKey, TValue>, TWrapped>
 	where TKey : notnull
 {
 	/// <summary>
 	/// The restriction policy
 	/// </summary>
-	public readonly OperationRestriction Restriction;
+	public readonly RestrictedDictionaryWrapper.OperationRestriction Restriction;
 
 	/// <inheritdoc />
-	TWrapped IWrapper<RestrictedDictionary<TWrapped, TKey, TValue>, TWrapped>.Wrapped => (TWrapped)DictionaryImpl;
+	TWrapped IWrapper<RestrictedDictionaryWrapper<TWrapped, TKey, TValue>, TWrapped>.Wrapped => (TWrapped)DictionaryImpl;
 
 
 	/// <inheritdoc />
@@ -35,7 +35,7 @@ public class RestrictedDictionary<TWrapped, TKey, TValue>
 	/// <param name="dictionaryImpl">The <see cref="VirtualDictionary{TKey,TValue}.DictionaryImpl"/></param>
 	/// <param name="restriction">The <see cref="Restriction"/></param>
 	/// <param name="publicWrapped">The <see cref="PublicWrapped"/></param>
-	public RestrictedDictionary(IDictionary<TKey, TValue> dictionaryImpl, OperationRestriction restriction,
+	public RestrictedDictionaryWrapper(IDictionary<TKey, TValue> dictionaryImpl, RestrictedDictionaryWrapper.OperationRestriction restriction,
 		bool publicWrapped = false) : base(dictionaryImpl)
 	{
 		Restriction = restriction;
@@ -44,19 +44,19 @@ public class RestrictedDictionary<TWrapped, TKey, TValue>
 
 	/// <inheritdoc />
 	public override int Count =>
-		(Restriction & OperationRestriction.CountItems) != 0
+		(Restriction & RestrictedDictionaryWrapper.OperationRestriction.CountItems) != 0
 			? throw new InvalidOperationException()
 			: base.Count;
 
 	/// <inheritdoc />
 	public override ICollection<TKey> Keys =>
-		(Restriction & OperationRestriction.EnumerateKeys) != 0
+		(Restriction & RestrictedDictionaryWrapper.OperationRestriction.EnumerateKeys) != 0
 			? throw new InvalidOperationException()
 			: base.Keys;
 
 	/// <inheritdoc />
 	public override ICollection<TValue> Values =>
-		(Restriction & OperationRestriction.EnumerateValues) != 0
+		(Restriction & RestrictedDictionaryWrapper.OperationRestriction.EnumerateValues) != 0
 			? throw new InvalidOperationException()
 			: base.Values;
 
@@ -64,11 +64,11 @@ public class RestrictedDictionary<TWrapped, TKey, TValue>
 	public override TValue this[TKey key]
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		get => (Restriction & OperationRestriction.GetItem) != 0 ? throw new InvalidOperationException() : base[key];
+		get => (Restriction & RestrictedDictionaryWrapper.OperationRestriction.GetItem) != 0 ? throw new InvalidOperationException() : base[key];
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		set
 		{
-			if ((Restriction & OperationRestriction.SetItem) != 0) throw new InvalidOperationException();
+			if ((Restriction & RestrictedDictionaryWrapper.OperationRestriction.SetItem) != 0) throw new InvalidOperationException();
 			base[key] = value;
 		}
 	}
@@ -77,7 +77,7 @@ public class RestrictedDictionary<TWrapped, TKey, TValue>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	public override void Add(TKey key, TValue value)
 	{
-		if ((Restriction & OperationRestriction.AddItem) != 0) throw new InvalidOperationException();
+		if ((Restriction & RestrictedDictionaryWrapper.OperationRestriction.AddItem) != 0) throw new InvalidOperationException();
 		base.Add(key, value);
 	}
 
@@ -85,7 +85,7 @@ public class RestrictedDictionary<TWrapped, TKey, TValue>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	public override void Clear()
 	{
-		if ((Restriction & OperationRestriction.Clear) != 0) throw new InvalidOperationException();
+		if ((Restriction & RestrictedDictionaryWrapper.OperationRestriction.Clear) != 0) throw new InvalidOperationException();
 		base.Clear();
 	}
 
@@ -93,7 +93,7 @@ public class RestrictedDictionary<TWrapped, TKey, TValue>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	public override bool Remove(TKey key)
 	{
-		if ((Restriction & OperationRestriction.RemoveItem) != 0) throw new InvalidOperationException();
+		if ((Restriction & RestrictedDictionaryWrapper.OperationRestriction.RemoveItem) != 0) throw new InvalidOperationException();
 		return base.Remove(key);
 	}
 
@@ -101,7 +101,7 @@ public class RestrictedDictionary<TWrapped, TKey, TValue>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
 	{
-		if ((Restriction & OperationRestriction.EnumerateItems) != 0) throw new InvalidOperationException();
+		if ((Restriction & RestrictedDictionaryWrapper.OperationRestriction.EnumerateItems) != 0) throw new InvalidOperationException();
 		return base.GetEnumerator();
 	}
 
@@ -109,14 +109,19 @@ public class RestrictedDictionary<TWrapped, TKey, TValue>
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	public override bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value)
 	{
-		if ((Restriction & OperationRestriction.AttemptGettingValue) != 0) throw new InvalidOperationException();
+		if ((Restriction & RestrictedDictionaryWrapper.OperationRestriction.AttemptGettingValue) != 0) throw new InvalidOperationException();
 		return base.TryGetValue(key, out value);
 	}
 
 	/// <inheritdoc />
-	public static implicit operator TWrapped(RestrictedDictionary<TWrapped, TKey, TValue> @this)
-		=> ((IWrapper<RestrictedDictionary<TWrapped, TKey, TWrapped>, TWrapped>)@this).Unwrap();
+	public static implicit operator TWrapped(RestrictedDictionaryWrapper<TWrapped, TKey, TValue> @this)
+		=> ((IWrapper<RestrictedDictionaryWrapper<TWrapped, TKey, TWrapped>, TWrapped>)@this).Unwrap();
+}
 
+#pragma warning disable CS1591
+public static class RestrictedDictionaryWrapper
+#pragma warning restore CS1591
+{
 	/// <summary>
 	/// Represents a set of operations which would be restricted
 	/// </summary>

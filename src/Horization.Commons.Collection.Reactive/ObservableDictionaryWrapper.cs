@@ -48,7 +48,7 @@ public class ObservableDictionaryWrapper<TWrapped, TKey, TValue>
 		var removed = base.Remove(key);
 		if (removed)
 			_subject.OnNext(new Notification(ObservableDictionary.Event.OnUpdated | ObservableDictionary.Event.OnRemoved,
-				this, key, value, default));
+				this, key, value));
 		return removed;
 	}
 
@@ -58,7 +58,7 @@ public class ObservableDictionaryWrapper<TWrapped, TKey, TValue>
 	{
 		base.Add(key, value);
 		_subject.OnNext(new Notification(ObservableDictionary.Event.OnUpdated | ObservableDictionary.Event.OnAdded, this,
-			key, value, default));
+			key, value));
 	}
 
 	/// <inheritdoc />
@@ -81,8 +81,8 @@ public class ObservableDictionaryWrapper<TWrapped, TKey, TValue>
 	public override void Clear()
 	{
 		base.Clear();
-		_subject.OnNext(new Notification(ObservableDictionary.Event.OnUpdated | ObservableDictionary.Event.OnCleared, this,
-			default, default, default));
+		_subject.OnNext(new Notification(ObservableDictionary.Event.OnUpdated | ObservableDictionary.Event.OnCleared,
+			this));
 	}
 
 	/// <inheritdoc/>
@@ -100,9 +100,9 @@ public class ObservableDictionaryWrapper<TWrapped, TKey, TValue>
 	public readonly record struct Notification(
 		ObservableDictionary.Event Event,
 		ObservableDictionaryWrapper<TWrapped, TKey, TValue> This,
-		TKey? Key,
-		TValue? Value,
-		TValue? OldValue
+		TKey? Key = default,
+		TValue? Value = default,
+		TValue? OldValue = default
 	);
 }
 

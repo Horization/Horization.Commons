@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Horization.Commons.Collecti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Horization.Commons.Collection.Reactive", "src\Horization.Commons.Collection.Reactive\Horization.Commons.Collection.Reactive.csproj", "{D31F6059-C3EA-4A67-BC52-9343C7B1362C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "collection", "collection", "{375B654E-3868-4540-8ADA-B8BDB47DB9E0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{D31F6059-C3EA-4A67-BC52-9343C7B1362C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D31F6059-C3EA-4A67-BC52-9343C7B1362C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D31F6059-C3EA-4A67-BC52-9343C7B1362C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DD863355-DD9A-408E-AD8B-0C04B78449B2} = {375B654E-3868-4540-8ADA-B8BDB47DB9E0}
+		{D31F6059-C3EA-4A67-BC52-9343C7B1362C} = {375B654E-3868-4540-8ADA-B8BDB47DB9E0}
 	EndGlobalSection
 EndGlobal

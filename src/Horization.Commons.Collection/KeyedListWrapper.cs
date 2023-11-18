@@ -54,7 +54,7 @@ public class KeyedListWrapper<TWrapped, TKey, TValue>
 	public override void Add(TValue item)
 	{
 		if (Dictionary.TryAdd(KeySelector(item), item)) base.Add(item);
-		throw new ArgumentException("Attempting to add duplicated item");
+		else throw new ArgumentException("Attempting to add duplicated item");
 	}
 
 	/// <inheritdoc />
@@ -67,17 +67,14 @@ public class KeyedListWrapper<TWrapped, TKey, TValue>
 
 	/// <inheritdoc />
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	public override bool Remove(TValue item)
-	{
-		return base.Remove(item) && Dictionary.Remove(KeySelector(item));
-	}
+	public override bool Remove(TValue item) => base.Remove(item) && Dictionary.Remove(KeySelector(item));
 
 	/// <inheritdoc />
 	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	public override void Insert(int index, TValue item)
 	{
 		if (Dictionary.TryAdd(KeySelector(item), item)) base.Insert(index, item);
-		throw new ArgumentException("Attempting to add duplicated item");
+		else throw new ArgumentException("Attempting to add duplicated item");
 	}
 
 	/// <inheritdoc />

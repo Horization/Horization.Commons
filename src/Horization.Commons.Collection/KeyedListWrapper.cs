@@ -13,7 +13,7 @@ namespace Horization.Commons.Collection;
 /// </remarks>
 public class KeyedListWrapper<TWrapped, TKey, TValue>
 	: VirtualList<TValue>,
-		IWrapper<KeyedListWrapper<TWrapped, TKey, TValue>, TWrapped>
+		IKeyedListWrapper<KeyedListWrapper<TWrapped, TKey, TValue>, TWrapped, TKey, TValue>
 	where TWrapped : IList<TValue>
 	where TKey : notnull
 {
@@ -23,15 +23,11 @@ public class KeyedListWrapper<TWrapped, TKey, TValue>
 	/// <inheritdoc />
 	public bool PublicWrapped { get; }
 
-	/// <summary>
-	/// The dictionary which is used to build key/value mapping
-	/// </summary>
-	protected readonly IDictionary<TKey, TValue> Dictionary;
+	/// <inheritdoc />
+	public IDictionary<TKey, TValue> Dictionary { get; }
 
-	/// <summary>
-	/// The factory used to select key from a value
-	/// </summary>
-	public readonly Func<TValue, TKey> KeySelector;
+	/// <inheritdoc />
+	public Func<TValue, TKey> KeySelector { get; }
 
 	/// <summary>
 	/// Construct a new instance
